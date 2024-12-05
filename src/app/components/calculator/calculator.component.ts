@@ -1,11 +1,22 @@
-import { Component } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
+import {Observable} from 'rxjs';
+import {CurrencyService} from '../../services/currency.service';
 
 @Component({
   selector: 'app-calculator',
   imports: [],
   templateUrl: './calculator.component.html',
-  styleUrl: './calculator.component.scss'
+  styleUrls: ['./calculator.component.scss']
 })
-export class CalculatorComponent {
+export class CalculatorComponent implements OnInit {
 
+  exchangeRates$!: Observable<any>;
+  currencyService = inject(CurrencyService);
+
+  ngOnInit() {
+    this.currencyService.getExchangeRates().subscribe({
+      next: data => console.log(data),
+      error: error => console.log(error),
+    });
+  }
 }
