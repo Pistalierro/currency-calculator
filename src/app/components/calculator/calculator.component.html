@@ -1,1 +1,36 @@
-<p>calculator works!</p>
+<div *ngIf="exchangeRates$ | async as exchangeRates; else loading">
+  <div>
+    <label for="amount">Введите сумму:</label>
+    <input [(ngModel)]="amount" id="amount" type="number">
+  </div>
+  <br>
+  <div>
+    <label for="fromCurrency">Из валюты:</label>
+    <select [(ngModel)]="fromCurrency" id="fromCurrency">
+      <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
+        {{ currency.name }} ({{ currency.code }})
+      </option>
+    </select>
+  </div>
+  <br>
+  <div>
+    <label for="toCurrency">В валюту:</label>
+    <select [(ngModel)]="toCurrency" id="toCurrency">
+      <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
+        {{ currency.name }} ({{ currency.code }})
+      </option>
+    </select>
+  </div>
+  <br>
+  <div>
+    <button (click)="convert(exchangeRates)">Конвертировать</button>
+  </div>
+  <br>
+  <div *ngIf="result !== null">
+    <p>Результат: {{ result }} {{ toCurrency }}</p>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p>Загрузка курсов валют...</p>
+</ng-template>
