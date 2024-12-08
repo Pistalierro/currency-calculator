@@ -3,13 +3,15 @@ import {map, Observable} from 'rxjs';
 import {CurrencyService} from '../../services/currency.service';
 import {ResponseExchangeInterface} from '../../types/response-exchange.interface';
 import {SUPPORTED_CURRENCIES} from '../../mock/supported-currancies';
-import {FormsModule} from '@angular/forms';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AsyncPipe, DecimalPipe, NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-calculator',
   imports: [
     FormsModule,
+    ReactiveFormsModule,
+    DecimalPipe,
     NgIf,
     AsyncPipe,
     NgForOf
@@ -21,14 +23,32 @@ export class CalculatorComponent implements OnInit {
 
   exchangeRates$!: Observable<{ [key: string]: number }>;
   currencyService = inject(CurrencyService);
-
-  amount: number = 0;
-  fromCurrency: string = 'UAH';
-  toCurrency: string = 'USD';
   result: number | null = null;
   supportedCurrencies = SUPPORTED_CURRENCIES;
+  calculatorForm!: FormGroup;
+  private fb = inject(FormBuilder);
 
   ngOnInit() {
+    this.getExchangeRates();
+    this.initializeForm();
+  }
+
+  convert(exchangeRates: { [key: string]: number }) {
+    const {amount, fromCurrency, toCurrency} = this.calculatorForm.value;
+
+    if (fromCurrency === toCurrency) {
+      this.result = amount;
+    } else if (fromCurrency === 'UAH') {
+      this.result = amount / exchangeRates[toCurrency];
+    } else if (toCurrency === 'UAH') {
+      this.result = amount * exchangeRates[fromCurrency];
+    } else {
+      const amountInUah = amount * exchangeRates[fromCurrency];
+      this.result = amountInUah / exchangeRates[toCurrency];
+    }
+  }
+
+  private getExchangeRates(): void {
     // Получаем курсы валют и преобразуем их в объект с парами "код валюты: курс"
     this.exchangeRates$ = this.currencyService.getExchangeRates().pipe(
       map((data: ResponseExchangeInterface[]) => {
@@ -42,20 +62,11 @@ export class CalculatorComponent implements OnInit {
     );
   }
 
-  convert(exchangeRates: { [key: string]: number }) {
-    if (this.fromCurrency === this.toCurrency) {
-      // Если валюты одинаковые, сумма остается неизменной
-      this.result = this.amount;
-    } else if (this.fromCurrency === 'UAH') {
-      // Конвертация из гривны в другую валюту
-      this.result = this.amount / exchangeRates[this.toCurrency];
-    } else if (this.toCurrency === 'UAH') {
-      // Конвертация из другой валюты в гривну
-      this.result = this.amount * exchangeRates[this.fromCurrency];
-    } else {
-      // Конвертация между двумя иностранными валютами через гривну
-      const amountInUah = this.amount * exchangeRates[this.fromCurrency];
-      this.result = amountInUah / exchangeRates[this.toCurrency];
-    }
+  private initializeForm(): void {
+    this.calculatorForm = this.fb.group({
+      amount: [0, [Validators.required, Validators.min(1)]],
+      fromCurrency: ['UAH', [Validators.required]],
+      toCurrency: ['USD', [Validators.required]],
+    });
   }
 }
