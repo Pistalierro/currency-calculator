@@ -1,27 +1,30 @@
-<div class="container mx-auto px-4 flex items-center justify-center py-[60px]">
+<div class="container mx-auto px-4 flex flex-col items-center justify-center py-[100px]">
   <div *ngIf="exchangeRates$ | async as exchangeRates; else loading">
-    <!-- Секция с курсами валют -->
     <div class="p-4 bg-gray-100 rounded-lg shadow-md mb-6">
       <h2 class="text-xl font-semibold mb-2">Курсы валют по отношению к гривне (UAH):</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div *ngFor="let currency of supportedCurrencies">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div *ngFor="let currency of supportedCurrencies" class="animate-fade-in">
           <div *ngIf="currency.code !== 'UAH'" class="p-2 bg-white rounded shadow text-center">
             <p class="font-bold text-lg">{{ currency.code }}</p>
             <p class="text-sm">{{ exchangeRates[currency.code] | number:'1.2-2' }}</p>
           </div>
         </div>
       </div>
+      <div class="text-center">
+        <button (click)="refreshRates()" class="px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 mt-4">
+          Обновить курсы
+        </button>
+      </div>
     </div>
-
-    <!-- Форма конвертации -->
     <form (ngSubmit)="convert(exchangeRates)" [formGroup]="calculatorForm">
       <div class="grid gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700" for="amount">Введите сумму:</label>
-          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" formControlName="amount" id="amount" type="number">
+          <input class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-1 px-2" formControlName="amount" id="amount"
+                 type="number">
           <div *ngIf="calculatorForm.controls['amount'].invalid && calculatorForm.controls['amount'].touched" class="text-red-500 text-sm">
-            <small *ngIf="calculatorForm.controls['amount'].errors?.['required']" class="text-red-600">Сумма обязательна для ввода.</small>
-            <small *ngIf="calculatorForm.controls['amount'].errors?.['min']" class="text-red-600">Сумма должна быть больше 0.</small>
+            <small *ngIf="calculatorForm.controls['amount'].errors?.['required']">Сумма обязательна для ввода.</small>
+            <small *ngIf="calculatorForm.controls['amount'].errors?.['min']">Сумма должна быть больше 0.</small>
           </div>
         </div>
 
@@ -51,7 +54,8 @@
         </div>
 
         <div *ngIf="result !== null" class="text-center mt-4">
-          <p class="text-xl font-semibold">Результат: {{ result | number:'1.2-2' }} {{ calculatorForm.value.toCurrency }}</p>
+          <p class="text-xl font-semibold animate-fade-in">
+            Результат: {{ result | number:'1.2-2' }} {{ calculatorForm.value.toCurrency }}</p>
         </div>
       </div>
     </form>

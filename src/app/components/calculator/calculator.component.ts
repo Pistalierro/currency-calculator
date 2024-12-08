@@ -48,8 +48,11 @@ export class CalculatorComponent implements OnInit {
     }
   }
 
+  refreshRates(): void {
+    this.ngOnInit();
+  }
+
   private getExchangeRates(): void {
-    // Получаем курсы валют и преобразуем их в объект с парами "код валюты: курс"
     this.exchangeRates$ = this.currencyService.getExchangeRates().pipe(
       map((data: ResponseExchangeInterface[]) => {
         return data.reduce((acc: { [key: string]: number }, rate: ResponseExchangeInterface) => {
