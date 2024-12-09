@@ -1,1 +1,73 @@
-<p>currency-calculator works!</p>
+<div class="container mx-auto my-[100px] p-4 max-w-xl bg-blue-50 shadow-md rounded-md">
+  <h1 class="text-2xl font-bold text-center mb-6">Калькулятор валют</h1>
+
+  <!-- Блок курсов валют -->
+  <div class="mb-6">
+    <h2 class="text-lg font-bold mb-4 text-center">Актуальные курсы валют</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div
+        *ngFor="let currency of currencies()"
+        class="bg-gray-100 p-4 rounded-md shadow flex flex-col items-center text-center"
+      >
+        <p class="text-sm font-medium">{{ currency.cc }}</p>
+        <p class="text-lg font-bold">{{ currency.rate }}</p>
+        <p class="text-xs text-gray-500">1 {{ baseCurrency }} → {{ currency.cc }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Форма -->
+  <form [formGroup]="form" class="space-y-6">
+    <!-- Ввод суммы -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2" for="amount">
+        Введите сумму:
+      </label>
+      <input
+        class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        formControlName="amount"
+        id="amount"
+        placeholder="Введите сумму"
+        type="number"
+      />
+    </div>
+
+    <!-- Выбор валют -->
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2" for="fromCurrency">
+        Из валюты:
+      </label>
+      <select
+        class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        formControlName="fromCurrency"
+        id="fromCurrency"
+      >
+        <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
+          {{ currency.name }} ({{ currency.code }})
+        </option>
+      </select>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-medium mb-2" for="toCurrency">
+        В валюту:
+      </label>
+      <select
+        class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        formControlName="toCurrency"
+        id="toCurrency"
+      >
+        <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
+          {{ currency.name }} ({{ currency.code }})
+        </option>
+      </select>
+    </div>
+  </form>
+
+  <!-- Результат -->
+  <div *ngIf="result() !== null" class="mt-6">
+    <p class="text-xl font-bold text-center">
+      Результат: {{ result() }}
+    </p>
+  </div>
+</div>
