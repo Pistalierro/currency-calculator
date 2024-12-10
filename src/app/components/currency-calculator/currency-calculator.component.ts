@@ -2,7 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CurrencyService} from '../../services/currency.service';
 import {CurrencyInterface} from '../../types/currency.interface';
-import {NgForOf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {SUPPORTED_CURRENCIES} from '../../mock/supported-currencies';
 
 @Component({
@@ -10,7 +10,8 @@ import {SUPPORTED_CURRENCIES} from '../../mock/supported-currencies';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    NgIf
   ],
   templateUrl: './currency-calculator.component.html',
   styleUrl: './currency-calculator.component.scss'
