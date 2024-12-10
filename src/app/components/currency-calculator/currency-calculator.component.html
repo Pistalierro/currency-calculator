@@ -1,12 +1,31 @@
-<div class="container mx-auto p-4 max-w-full sm:max-w-md lg:max-w-xl bg-blue-50 shadow-md sm:rounded-md">
+<div class="container mx-auto p-4 max-w-full sm:max-w-xl  bg-blue-50 shadow-md sm:rounded-md">
   <h1
-    class="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-blue-600 text-white py-2 rounded-md shadow-md">
+    class="text-xl sm:text-2xl  md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-blue-600 text-white py-2 rounded-md shadow-md">
     Калькулятор валют
   </h1>
 
+  <div class="time flex flex-col md:flex-row text-center items-center justify-center md:justify-between">
+    <div class="text-blue-700">
+      <span>Текущее время: {{ currentTime() }}</span>
+    </div>
+    <div class="text-blue-700">
+      <span *ngIf="!lastUpdated">Данные загружаются...</span>
+      <span *ngIf="lastUpdated">
+        Последнее обновление курса: {{ lastUpdated }}
+      </span>
+    </div>
+  </div>
 
-  <div class="mb-6">
-    <h2 class="text-lg font-bold mb-4 text-center">Актуальные курсы валют</h2>
+
+  <div class="my-4">
+    <div class="w-full text-center mb-4">
+      <h3 class="text-blue-800">Курс обновляются автоматически каждые 60 минут.</h3>
+      <button (click)="refreshRates()"
+              class="cursor-pointer border-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white uppercase px-2 py-1 rounded-md ">
+        Обновить сейчас
+      </button>
+    </div>
+    <h2 class="text-lg font-bold mb-4 text-center text-blue-800">Актуальный курс валют</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <div
         *ngFor="let currency of currencies()"
@@ -19,21 +38,15 @@
     </div>
   </div>
 
-  <!-- Форма -->
   <form [formGroup]="form" class="space-y-6">
-    <!-- Ввод суммы -->
-    <div>
+    <div class="h-16">
       <label class="block text-gray-700 text-sm font-medium mb-2 w-full text-center" for="amount">
         Введите сумму:
       </label>
       <input
         class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        formControlName="amount"
-        id="amount"
-        placeholder="Введите сумму"
-        type="number"
-      />
-      <small *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="text-red-500 mt-1 block">
+        formControlName="amount" id="amount" placeholder="Введите сумму" type="number"/>
+      <small *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="text-red-500 mt-1 block h-5">
         <span *ngIf="form.get('amount')?.errors?.['required']">Сумма обязательна для заполнения.</span>
         <span *ngIf="form.get('amount')?.errors?.['min']">Сумма должна быть больше нуля.</span>
       </small>
@@ -45,9 +58,8 @@
       </label>
       <select
         class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        formControlName="fromCurrency"
-        id="fromCurrency"
-      >
+        formControlName="fromCurrency" id="fromCurrency">
+        <option [value]="null" disabled>Выберите валюту</option>
         <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
           {{ currency.name }} ({{ currency.code }})
         </option>
@@ -55,14 +67,12 @@
     </div>
 
     <div>
-      <label class="block text-gray-700 text-md font-medium mb-2" for="toCurrency">
+      <label class="block text-gray-700 text-md font-medium mb-2 w-full text-center" for="toCurrency">
         В валюту:
       </label>
-      <select
-        class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        formControlName="toCurrency"
-        id="toCurrency"
-      >
+      <select class="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              formControlName="toCurrency" id="toCurrency">
+        <option [value]="null" disabled>Выберите валюту</option>
         <option *ngFor="let currency of supportedCurrencies" [value]="currency.code">
           {{ currency.name }} ({{ currency.code }})
         </option>

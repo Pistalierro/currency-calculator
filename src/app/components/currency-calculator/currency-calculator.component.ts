@@ -21,18 +21,17 @@ export class CurrencyCalculatorComponent implements OnInit {
   form!: FormGroup;
   currencies = signal<CurrencyInterface[]>([]);
   result = signal<number | null>(null);
+  currentTime = signal<string>('');
   supportedCurrencies = SUPPORTED_CURRENCIES;
   baseCurrency = 'UAH';
+  lastUpdated: string | null = null;
   private fb = inject(FormBuilder);
   private currencyService = inject(CurrencyService);
-
-  get currencyList(): CurrencyInterface[] {
-    return this.currencies();
-  }
 
   ngOnInit(): void {
     this.getExchangeRates();
     this.initializeForm();
+    this.startClock();
   }
 
   calculate(): void {
@@ -42,34 +41,43 @@ export class CurrencyCalculatorComponent implements OnInit {
       this.result.set(null);
       return;
     }
-
-    const fromRate = fromCurrency === 'UAH' ? 1 : this.currencies().find((c) => c.cc === fromCurrency)?.rate;
-    const toRate = toCurrency === 'UAH' ? 1 : this.currencies().find((c) => c.cc === toCurrency)?.rate;
+    const fromRate = this.getRate(fromCurrency);
+    const toRate = this.getRate(toCurrency);
 
     if (!fromRate || !toRate) {
       this.result.set(null);
       return;
     }
 
-    // Рассчитать результат
     const converted = (amount * fromRate) / toRate;
     this.result.set(Number(converted.toFixed(2)));
   }
 
-
-  getCurrencyName(code: string): string {
-    return this.supportedCurrencies.find((c) => c.code === code)?.name || '';
+  refreshRates(): void {
+    console.log('click');
+    this.currencyService.clearCache();
+    this.getExchangeRates();
   }
 
-
-  private getExchangeRates(): void {
+  getExchangeRates(): void {
     this.currencyService.getExchangeRates().subscribe((data) => {
-      // Фильтруем данные из API по поддерживаемым валютам
       const filtered = data.filter((currency: CurrencyInterface) =>
         this.supportedCurrencies.some((supported) => supported.code === currency.cc)
       );
       this.currencies.set(filtered);
+      this.lastUpdated = this.currencyService.getLastUpdatedTime();
     });
+  }
+
+  private startClock(): void {
+    setInterval(() => {
+      const now = new Date();
+      this.currentTime.set(now.toLocaleTimeString());
+    }, 1000);
+  }
+
+  private getRate(currency: string): number {
+    return currency === this.baseCurrency ? 1 : this.currencies().find((c) => c.cc === currency)?.rate ?? 0;
   }
 
   private initializeForm(): void {
@@ -79,7 +87,7 @@ export class CurrencyCalculatorComponent implements OnInit {
       toCurrency: ['USD', [Validators.required]],
     });
     this.form.valueChanges.subscribe(() => {
-      this.calculate(); // Пересчитываем результат при изменении формы
+      this.calculate();
     });
   }
 }
