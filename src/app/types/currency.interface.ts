@@ -1,6 +1,6 @@
 export interface CurrencyInterface {
   cc: string;
-  exchangeDate: string;
+  exchangedate: string;
   r030: number;
   rate: number;
   txt: string;
